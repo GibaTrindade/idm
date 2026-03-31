@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "prepare-data": "python scripts/build_idm_dataset.py",
-    "prebuild": "npm run prepare-data",
+    "build:data": "npm run prepare-data && vite build",
     "build": "vite build",
     "preview": "vite preview"
   },
