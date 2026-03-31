@@ -1,0 +1,35 @@
+﻿default:
+  image: node:22
+
+stages:
+  - deploy
+
+variables:
+  VERCEL_CLI_VERSION: "latest"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+
+before_script:
+  - npm ci
+  - npm install --global vercel@$VERCEL_CLI_VERSION
+
+deploy_preview:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+  script:
+    - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+    - vercel build --token=$VERCEL_TOKEN
+    - vercel deploy --prebuilt --token=$VERCEL_TOKEN -m gitlabDeployment=1 -m gitlabCommitRef=$CI_COMMIT_REF_NAME -m gitlabCommitSha=$CI_COMMIT_SHA
+
+deploy_production:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+    - vercel build --prod --token=$VERCEL_TOKEN
+    - vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN -m gitlabDeployment=1 -m gitlabCommitRef=$CI_COMMIT_REF_NAME -m gitlabCommitSha=$CI_COMMIT_SHA
