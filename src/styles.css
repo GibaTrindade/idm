@@ -1,0 +1,798 @@
+﻿:root {
+  color-scheme: light;
+  --bg: #eef6f8;
+  --panel: rgba(255, 253, 249, 0.86);
+  --panel-strong: rgba(255, 253, 249, 0.96);
+  --border: rgba(122, 154, 169, 0.24);
+  --text: #203040;
+  --muted: #667b88;
+  --primary: #2b7b99;
+  --primary-soft: #dcebF2;
+  --primary-strong: #1e6d8a;
+  --warm: #d4a373;
+  --warm-soft: #f4e5d2;
+  --shadow: 0 20px 50px rgba(60, 88, 104, 0.12);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(185, 225, 240, 0.44), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(235, 205, 171, 0.28), transparent 30%),
+    linear-gradient(180deg, #edf6f7 0%, #f7f4ee 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  width: min(100vw - 20px, 100%);
+  margin: 0 auto;
+  padding: 12px 0 36px;
+}
+
+.panel,
+.hero-shell,
+.detail-block,
+.comparison-card,
+.region-highlight-card,
+.indicator-compare-card,
+.indicator-spotlight-card,
+.dimension-feature,
+.ranking-row,
+.class-pill,
+.legend-band,
+.municipality-chip,
+.secondary-action,
+.hero-cta,
+.radar-pivot,
+.focus-stat,
+.map-badge,
+.rank-badge,
+.value-pill,
+.detail-chip {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.panel {
+  border-radius: 30px;
+  padding: 18px;
+}
+
+.panel-soft-glow {
+  background:
+    radial-gradient(circle at top left, rgba(185, 225, 240, 0.34), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(235, 205, 171, 0.26), transparent 28%),
+    var(--panel-strong);
+}
+
+.hero {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hero-topline,
+.section-head,
+.subsection-head,
+.comparison-topline,
+.detail-header,
+.map-header,
+.map-footer-row,
+.focus-region-row,
+.indicator-compare-top,
+.indicator-spotlight-top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero-copy h1,
+.map-shell h2,
+.focus-panel h2,
+.region-highlight-panel h2,
+.comparison-hero h2,
+.municipality-hero h2,
+.workspace-tab strong,
+.stat-card h2 {
+  margin: 0;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2.4rem, 10vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+.hero-copy p,
+.panel-copy,
+.map-intro,
+.region-highlight-card p,
+.indicator-spotlight-card p,
+.active-dimension-card p,
+.detail-block p,
+.stat-card p,
+.comparison-card p {
+  color: var(--muted);
+}
+
+.eyebrow {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.72rem;
+  color: #6c8493;
+}
+
+.hero-cta,
+.secondary-action {
+  border-radius: 999px;
+  padding: 13px 20px;
+  color: #fff;
+  background: var(--primary);
+  border-color: rgba(43, 123, 153, 0.24);
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.secondary-action {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.hero-toolbar,
+.toolbar,
+.overview-grid,
+.content-grid,
+.right-column,
+.left-column,
+.comparison-grid,
+.comparison-controls,
+.region-grid,
+.region-highlight-grid,
+.focus-stats-grid,
+.dimension-grid,
+.dimension-grid.compact,
+.feature-grid,
+.indicator-compare-grid,
+.indicator-spotlight-list,
+.municipality-detail-grid,
+.overview-stage,
+.municipality-page-stack,
+.comparison-page-stack,
+.region-panel-stack,
+.atlas-side-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+}
+
+input,
+select {
+  width: 100%;
+  border-radius: 22px;
+  border: 1px solid rgba(122, 154, 169, 0.24);
+  background: rgba(255, 255, 255, 0.76);
+  padding: 15px 18px;
+  color: var(--text);
+  outline: none;
+}
+
+input:focus,
+select:focus,
+button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(43, 123, 153, 0.12);
+  outline: none;
+}
+
+.route-strip {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.nav-chip {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.nav-chip.active,
+.nav-chip:hover,
+.workspace-tab.active,
+.workspace-tab:hover,
+.ranking-row.active,
+.ranking-row:hover,
+.municipality-chip.active,
+.municipality-chip:hover,
+.dimension-feature.active,
+.dimension-feature:hover,
+.radar-pivot.active,
+.radar-pivot:hover,
+.secondary-action:hover,
+.hero-cta:hover {
+  background: rgba(207, 229, 238, 0.92);
+  color: var(--text);
+  border-color: rgba(43, 123, 153, 0.22);
+}
+
+.workspace-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.workspace-tab {
+  border: 0;
+  border-radius: 24px;
+  padding: 16px 14px;
+  background: transparent;
+  text-align: left;
+}
+
+.workspace-tab strong {
+  display: block;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 400;
+}
+
+.workspace-tab span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.76rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat-card {
+  padding: 20px;
+}
+
+.stat-card strong,
+.focus-stat strong,
+.rank-badge,
+.comparison-topline strong,
+.dimension-feature strong,
+.detail-badge {
+  font-size: 2rem;
+}
+
+.highlight {
+  background: linear-gradient(135deg, rgba(185, 225, 240, 0.34), rgba(255, 253, 249, 0.92));
+}
+
+.class-list,
+.comparison-legend,
+.municipality-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.class-pill {
+  border-radius: 22px;
+  padding: 12px 14px;
+}
+
+.class-pill span,
+.class-pill strong,
+.focus-stat span,
+.focus-region-row span,
+.value-pill span,
+.indicator-compare-top span,
+.indicator-spotlight-top span,
+.ranking-row small {
+  display: block;
+}
+
+.class-pill strong,
+.focus-stat strong,
+.focus-region-row strong,
+.value-pill strong,
+.ranking-row strong,
+.indicator-compare-top strong,
+.indicator-spotlight-top strong,
+.active-dimension-card h3,
+.detail-block h3,
+.comparison-card h3,
+.region-highlight-card h3,
+.focus-panel h2,
+.map-shell h2,
+.comparison-hero h2,
+.region-highlight-panel h2,
+.municipality-hero h2 {
+  margin-top: 6px;
+}
+
+.map-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.map-badge,
+.rank-badge,
+.detail-chip,
+.map-caption,
+.focus-stat,
+.value-pill,
+.active-dimension-card,
+.indicator-compare-card,
+.indicator-spotlight-card,
+.dimension-feature,
+.municipality-chip,
+.ranking-row,
+.comparison-card,
+.focus-panel,
+.region-highlight-card,
+.panel {
+  border-radius: 28px;
+}
+
+.map-badge,
+.rank-badge,
+.detail-chip {
+  padding: 10px 14px;
+  box-shadow: none;
+  background: rgba(233, 243, 247, 0.92);
+}
+
+.map-frame {
+  border-radius: 32px;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 40%, rgba(195, 229, 241, 0.65), rgba(255, 255, 255, 0) 60%);
+}
+
+.map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-path {
+  transition: fill 180ms ease, stroke 180ms ease, transform 180ms ease;
+}
+
+.map-path.hovered,
+.map-path:hover {
+  fill: #3d88a4;
+  stroke: #d69a57;
+  transform: translateY(-1px);
+}
+
+.map-footer-row {
+  gap: 14px;
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.legend-band {
+  padding: 8px 12px;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.legend-swatch,
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.legend-gradient {
+  width: 120px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e7d4bc, #78a9bb, #2b7b99);
+}
+
+.legend-dot.left {
+  background: var(--primary);
+}
+
+.legend-dot.right {
+  background: var(--warm);
+}
+
+.map-caption {
+  padding: 14px 16px;
+  box-shadow: none;
+}
+
+.map-floating-tooltip {
+  position: fixed;
+  z-index: 40;
+  max-width: min(280px, calc(100vw - 24px));
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 252, 248, 0.96);
+  border: 1px solid rgba(122, 154, 169, 0.22);
+  box-shadow: 0 20px 40px rgba(61, 85, 99, 0.18);
+  pointer-events: none;
+}
+
+.map-hover-card {
+  display: grid;
+  gap: 6px;
+}
+
+.focus-panel,
+.ranking-panel,
+.comparison-card,
+.active-dimension-card,
+.region-highlight-card,
+.indicator-compare-card,
+.indicator-spotlight-card,
+.dimension-feature {
+  padding: 20px;
+}
+
+.focus-stats-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.focus-stat,
+.value-pill {
+  padding: 14px 16px;
+  box-shadow: none;
+}
+
+.focus-region-row,
+.indicator-compare-values {
+  display: grid;
+  gap: 12px;
+}
+
+.ranking-row {
+  align-items: center;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 16px;
+  text-align: left;
+  box-shadow: none;
+}
+
+.ranking-row span,
+.ranking-row small {
+  color: var(--muted);
+}
+
+.ranking-row strong {
+  display: block;
+  color: var(--text);
+}
+
+.filter-dot {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: radial-gradient(circle at 35% 35%, rgba(185, 225, 240, 0.55), rgba(255,255,255,0.9));
+}
+
+.region-highlight-card.active,
+.focus-panel,
+.active-dimension-card,
+.ranking-row.active,
+.value-pill.teal,
+.dimension-feature.active {
+  background: rgba(217, 234, 241, 0.9);
+}
+
+.region-highlight-footer,
+.indicator-compare-values,
+.comparison-legend {
+  color: var(--muted);
+}
+
+.region-highlight-footer,
+.indicator-compare-values {
+  display: grid;
+  gap: 10px;
+}
+
+.comparison-hero-grid,
+.municipality-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.comparison-radar-shell {
+  position: relative;
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+}
+
+.comparison-radar {
+  max-width: 320px;
+}
+
+.radar-grid,
+.radar-axis {
+  fill: none;
+  stroke: rgba(122, 154, 169, 0.35);
+  stroke-width: 1;
+}
+
+.radar-shape {
+  stroke-width: 2.5;
+}
+
+.radar-teal {
+  fill: rgba(43, 123, 153, 0.16);
+  stroke: var(--primary);
+}
+
+.radar-warm {
+  fill: rgba(212, 163, 115, 0.14);
+  stroke: var(--warm);
+}
+
+.radar-pivot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  padding: 9px 13px;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.comparison-legend {
+  gap: 16px;
+}
+
+.indicator-compare-top b,
+.indicator-spotlight-top b {
+  font-size: 1.1rem;
+}
+
+.indicator-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(220, 230, 236, 0.9);
+  overflow: hidden;
+}
+
+.indicator-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #9fc8d8, #2b7b99);
+}
+
+.municipality-chip {
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: none;
+  background: rgba(255,255,255,0.72);
+}
+
+.dimension-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.dimension-feature {
+  text-align: left;
+  box-shadow: none;
+}
+
+.dimension-feature span {
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.trend-chart {
+  width: 100%;
+  height: auto;
+}
+
+.chart-axis {
+  stroke: rgba(122, 154, 169, 0.42);
+}
+
+.chart-average-line {
+  stroke: rgba(43, 123, 153, 0.34);
+  stroke-dasharray: 4 5;
+}
+
+.chart-average-label,
+.chart-label,
+.chart-value-label {
+  fill: var(--muted);
+  font-size: 0.72rem;
+}
+
+.chart-line {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-dot {
+  fill: #2b7b99;
+}
+
+.detail-badge.slim {
+  font-size: 1.35rem;
+  padding: 12px 16px;
+  box-shadow: none;
+  background: rgba(233, 243, 247, 0.9);
+}
+
+.panel-copy,
+.map-intro {
+  margin: 0;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  text-align: center;
+  color: var(--muted);
+  border-radius: 24px;
+  border: 1px dashed var(--border);
+  background: rgba(255,255,255,0.5);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .map-floating-tooltip {
+    display: none;
+  }
+}
+
+.comparison-controls-shell,
+.map-panel,
+.focus-panel,
+.ranking-panel,
+.region-highlight-panel,
+.comparison-hero,
+.municipality-hero {
+  overflow: hidden;
+}
+
+.comparison-heading,
+.small-gap {
+  align-items: flex-start;
+}
+
+.two-up {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .app-shell {
+    width: min(100vw - 30px, 100%);
+    padding-top: 18px;
+  }
+
+  .hero-topline,
+  .section-head,
+  .subsection-head,
+  .comparison-topline,
+  .detail-header,
+  .map-header,
+  .map-footer-row,
+  .focus-region-row,
+  .indicator-compare-top,
+  .indicator-spotlight-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .hero-toolbar,
+  .overview-grid,
+  .comparison-controls.two-up,
+  .comparison-grid.two-up,
+  .region-grid,
+  .focus-stats-grid,
+  .dimension-grid,
+  .dimension-grid.compact,
+  .feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .indicator-compare-grid,
+  .region-highlight-grid,
+  .municipality-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace-tab {
+    padding: 20px 18px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .app-shell {
+    width: min(1480px, calc(100vw - 46px));
+    padding-top: 28px;
+    padding-bottom: 48px;
+  }
+
+  .panel {
+    padding: 28px;
+  }
+
+  .content-grid.atlas-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    gap: 20px;
+  }
+
+  .comparison-hero-grid {
+    grid-template-columns: 320px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .region-highlight-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dimension-card-grid.feature-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .municipality-detail-grid {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  }
+
+  .hero-copy h1 {
+    max-width: 12ch;
+  }
+}
