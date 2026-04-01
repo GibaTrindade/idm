@@ -703,6 +703,10 @@ function App() {
     });
   }
 
+  function handleMunicipalityFocus(slug) {
+    setSelectedSlug(slug);
+  }
+
   function handleMunicipalitySelect(slug) {
     setSelectedSlug(slug);
     setHashRoute({ page: 'municipio', slug });
@@ -814,7 +818,7 @@ function App() {
                     metricKey={metricKey}
                     metricLabel={selectedMetric.label}
                     selectedSlug={selectedMunicipality.slug}
-                    onSelect={handleMunicipalitySelect}
+                    onSelect={handleMunicipalityFocus}
                     classBands={dataset.classBands}
                   />
                 </article>
@@ -842,23 +846,28 @@ function App() {
                     </div>
                   </article>
 
-                  <article className="panel ranking-panel">
-                    <div className="section-head">
+                  <article className="panel ranking-panel ranking-clean-panel">
+                    <div className="section-head ranking-clean-head">
                       <div>
                         <span className="eyebrow">Ranking de municipios</span>
                         <h2>Top desempenho</h2>
                       </div>
                       <div className="filter-dot" />
                     </div>
-                    <div className="ranking-table">
+                    <div className="ranking-clean-list">
                       {yearlyRows.filtered.slice(0, 8).map((item, index) => (
-                        <button key={item.municipality.slug} type="button" className={`ranking-row ${item.municipality.slug === selectedMunicipality.slug ? 'active' : ''}`} onClick={() => setSelectedSlug(item.municipality.slug)}>
-                          <span>{index + 1}</span>
-                          <div>
+                        <button
+                          key={item.municipality.slug}
+                          type="button"
+                          className={`ranking-clean-row ${item.municipality.slug === selectedMunicipality.slug ? 'active' : ''}`}
+                          onClick={() => setSelectedSlug(item.municipality.slug)}
+                        >
+                          <span className="ranking-clean-index">{index + 1}</span>
+                          <div className="ranking-clean-copy">
                             <strong>{item.municipality.name}</strong>
                             <small>{getRegionLabel(item.municipality)}</small>
                           </div>
-                          <span>{formatDecimal(item.value)}</span>
+                          <b className="ranking-clean-score">{formatDecimal(item.value)}</b>
                         </button>
                       ))}
                     </div>
