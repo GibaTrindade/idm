@@ -1,4 +1,4 @@
-﻿import React, { startTransition, useDeferredValue, useEffect, useMemo, useState } from 'react';
+﻿import React, { startTransition, useEffect, useMemo, useState } from 'react';
 import dataset from './data/idmDataset.json';
 import geojson from './data/peMunicipios.json';
 
@@ -156,6 +156,48 @@ function describeMacroCard(name, year, average, municipalities) {
   };
 }
 
+
+function compactRadarLabel(label, isDimension = false) {
+  if (!label) return '';
+  if (isDimension) {
+    const dimensionMap = {
+      Ambiental: 'Amb.',
+      Economia: 'Eco.',
+      Social: 'Soc.',
+      'Governanca Publica': 'Gov.',
+      'Governan?a P?blica': 'Gov.',
+    };
+    return dimensionMap[label] ?? label;
+  }
+
+  const normalized = label
+    .replace('Indice de ', '')
+    .replace('?ndice de ', '')
+    .replace('Indice do ', '')
+    .replace('?ndice do ', '')
+    .replace('Taxa de ', '')
+    .replace('Participacao de ', '')
+    .replace('Participa??o de ', '')
+    .replace('Proporcao de ', '')
+    .replace('Propor??o de ', '')
+    .replace('Mortalidade por ', '')
+    .replace('Percentual de ', '')
+    .replace('Densidade de ', '')
+    .replace('Numero de ', '')
+    .replace('N?mero de ', '')
+    .replace(' por habitante', '')
+    .replace(' total', '')
+    .trim();
+
+  if (normalized.length <= 12) return normalized;
+  const words = normalized.split(' ');
+  if (words.length >= 2) {
+    const joined = words.slice(0, 2).join(' ');
+    return joined.length <= 14 ? joined : `${joined.slice(0, 13)}?`;
+  }
+  return `${normalized.slice(0, 13)}?`;
+}
+
 function TrendChart({ values }) {
   const width = 360;
   const height = 140;
@@ -181,7 +223,6 @@ function TrendChart({ values }) {
       </defs>
       <line x1={paddingX} y1={height - paddingY} x2={width - paddingX} y2={height - paddingY} className="chart-axis" />
       <line x1={paddingX} y1={averageY} x2={width - paddingX} y2={averageY} className="chart-average-line" />
-      <text x={paddingX} y={Math.max(12, averageY - 8)} className="chart-average-label">Media {formatDecimal(average)}</text>
       <path d={path} className="chart-line" stroke="url(#historyGradient)" />
       {points.map((point) => (
         <g key={point.label}>
@@ -217,7 +258,7 @@ function ComparisonRadarPanel({ first, second, items, activeKey, activeDimension
   const leftPoints = pointsFor('valueLeft');
   const rightPoints = pointsFor('valueRight');
   const polygon = (points) => points.map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ');
-  const strongestDiffs = items.slice(0, 4);
+  const strongestDiffs = items;
 
   return (
     <section className="panel comparison-hero panel-soft-glow">
@@ -226,39 +267,41 @@ function ComparisonRadarPanel({ first, second, items, activeKey, activeDimension
           <span className="eyebrow">Radar territorial</span>
           <h2>Forcas comparadas por dimensao</h2>
         </div>
-        <div className="comparison-legend">
-          <span><i className="legend-dot left" />{first?.name ?? 'Municipio A'}</span>
-          <span><i className="legend-dot right" />{second?.name ?? 'Municipio B'}</span>
-        </div>
       </div>
 
       <div className="comparison-hero-grid">
         <div className="comparison-radar-shell">
-          <svg viewBox={`0 0 ${size} ${size}`} className="radar-svg comparison-radar" role="img" aria-label="Comparacao territorial">
-            {levels.map((level) => (
-              <polygon
-                key={level}
-                points={leftPoints.map((point) => `${(center + Math.cos(point.angle) * radius * level).toFixed(2)},${(center + Math.sin(point.angle) * radius * level).toFixed(2)}`).join(' ')}
-                className="radar-grid"
-              />
-            ))}
+          <div className="comparison-legend comparison-legend-near">
+            <span><i className="legend-dot left" />{first?.name ?? 'Municipio A'}</span>
+            <span><i className="legend-dot right" />{second?.name ?? 'Municipio B'}</span>
+          </div>
+          <div className="comparison-radar-stage">
+            <svg viewBox={`0 0 ${size} ${size}`} className="radar-svg comparison-radar" role="img" aria-label="Comparacao territorial">
+              {levels.map((level) => (
+                <polygon
+                  key={level}
+                  points={leftPoints.map((point) => `${(center + Math.cos(point.angle) * radius * level).toFixed(2)},${(center + Math.sin(point.angle) * radius * level).toFixed(2)}`).join(' ')}
+                  className="radar-grid"
+                />
+              ))}
+              {leftPoints.map((point) => (
+                <line key={point.key} x1={center} y1={center} x2={center + Math.cos(point.angle) * radius} y2={center + Math.sin(point.angle) * radius} className="radar-axis" />
+              ))}
+              <polygon points={polygon(leftPoints)} className="radar-shape radar-teal" />
+              <polygon points={polygon(rightPoints)} className="radar-shape radar-warm" />
+            </svg>
             {leftPoints.map((point) => (
-              <line key={point.key} x1={center} y1={center} x2={center + Math.cos(point.angle) * radius} y2={center + Math.sin(point.angle) * radius} className="radar-axis" />
+              <button
+                key={point.key}
+                type="button"
+                className={`radar-pivot ${activeKey === point.key ? 'active' : ''}`}
+                style={{ left: `${(point.buttonX / size) * 100}%`, top: `${(point.buttonY / size) * 100}%` }}
+                onClick={() => onSelectItem(point)}
+              >
+                {point.shortLabel}
+              </button>
             ))}
-            <polygon points={polygon(leftPoints)} className="radar-shape radar-teal" />
-            <polygon points={polygon(rightPoints)} className="radar-shape radar-warm" />
-          </svg>
-          {leftPoints.map((point) => (
-            <button
-              key={point.key}
-              type="button"
-              className={`radar-pivot ${activeKey === point.key ? 'active' : ''}`}
-              style={{ left: `${(point.buttonX / size) * 100}%`, top: `${(point.buttonY / size) * 100}%` }}
-              onClick={() => onSelectItem(point)}
-            >
-              {point.shortLabel}
-            </button>
-          ))}
+          </div>
         </div>
 
         <div className="comparison-detail-stack">
@@ -603,12 +646,10 @@ function App() {
   const [metricKey, setMetricKey] = useState('idm');
   const [selectedSlug, setSelectedSlug] = useState(getRouteFromHash().slug || slugify(dataset.summary.years[latestYear].top.name));
   const [focusDimension, setFocusDimension] = useState('economia');
-  const [rankingSearch, setRankingSearch] = useState('');
   const [leftComparison, setLeftComparison] = useState('recife');
   const [rightComparison, setRightComparison] = useState('petrolina');
   const [comparisonDrill, setComparisonDrill] = useState(null);
   const [overviewTab, setOverviewTab] = useState('atlas');
-  const deferredSearch = useDeferredValue(rankingSearch);
 
   useEffect(() => {
     const syncRoute = () => setRoute(getRouteFromHash());
@@ -646,9 +687,8 @@ function App() {
       .map((municipality) => ({ municipality, value: getMetricValue(municipality, selectedYear, metricKey) }))
       .filter((item) => item.value != null)
       .sort((a, b) => b.value - a.value);
-    const needle = deferredSearch.trim().toLowerCase();
-    return { all: rows, filtered: needle ? rows.filter((item) => item.municipality.name.toLowerCase().includes(needle)) : rows };
-  }, [model, selectedYear, metricKey, deferredSearch]);
+    return { all: rows, filtered: rows };
+  }, [model, selectedYear, metricKey]);
 
   const selectedRank = useMemo(() => yearlyRows.all.findIndex((item) => item.municipality.slug === selectedMunicipality.slug) + 1, [selectedMunicipality, yearlyRows]);
 
@@ -673,7 +713,7 @@ function App() {
     if (!comparisonDrill) {
       return dataset.dimensions.map((dimension) => ({
         key: dimension.key,
-        shortLabel: dimension.label.replace(' Publica', '').slice(0, 3).toUpperCase(),
+        shortLabel: compactRadarLabel(dimension.label, true),
         label: dimension.label,
         description: dimension.description,
         valueLeft: leftMunicipality?.dimensions?.[dimension.key]?.[selectedYear] ?? null,
@@ -684,7 +724,7 @@ function App() {
       .filter((indicator) => indicator.dimension === comparisonDrill)
       .map((indicator) => ({
         key: indicator.key,
-        shortLabel: indicator.label.replace('Indice de ', '').replace('Taxa de ', '').replace('Participacao de ', '').replace('Proporcao de ', '').replace('Mortalidade por ', '').slice(0, 10),
+        shortLabel: compactRadarLabel(indicator.label),
         label: indicator.label,
         description: indicator.description,
         valueLeft: leftMunicipality?.indicators?.[selectedYear]?.[indicator.key] ?? null,
@@ -754,8 +794,10 @@ function App() {
             </select>
           </label>
           <label>
-            <span className="eyebrow">Buscar municipio</span>
-            <input value={rankingSearch} onChange={(event) => setRankingSearch(event.target.value)} placeholder="Ex.: Caruaru" />
+            <span className="eyebrow">Municipio em foco</span>
+            <select value={selectedMunicipality.slug} onChange={(event) => handleMunicipalityFocus(event.target.value)}>
+              {model.municipalities.map((municipality) => <option key={municipality.slug} value={municipality.slug}>{municipality.name}</option>)}
+            </select>
           </label>
         </section>
       </header>

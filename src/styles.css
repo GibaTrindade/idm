@@ -676,15 +676,35 @@ button:focus-visible {
 }
 
 .comparison-radar-shell {
-  position: relative;
   min-height: 340px;
   display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 14px;
+  padding: 16px 16px 22px;
+}
+
+.comparison-radar-stage {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  min-height: 320px;
+  display: grid;
   place-items: center;
-  padding: 16px;
 }
 
 .comparison-radar {
+  width: 100%;
   max-width: 320px;
+}
+
+.comparison-legend-near {
+  width: 100%;
+  justify-content: center;
+  padding-inline: 12px;
+  margin-bottom: 2px;
+  position: relative;
+  z-index: 3;
 }
 
 .radar-grid,
@@ -714,11 +734,17 @@ button:focus-visible {
   position: absolute;
   transform: translate(-50%, -50%);
   border-radius: 999px;
-  padding: 9px 13px;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  padding: 8px 10px;
+  min-width: 92px;
+  max-width: 118px;
+  font-size: 0.62rem;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: none;
 }
 
@@ -919,7 +945,12 @@ button:focus-visible {
 
   .comparison-hero-grid {
     grid-template-columns: 340px minmax(0, 1fr);
-    align-items: center;
+    align-items: start;
+  }
+
+  .comparison-legend-near {
+    justify-content: flex-start;
+    padding-left: 34px;
   }
 
   .region-highlight-grid {
