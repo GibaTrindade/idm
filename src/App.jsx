@@ -228,7 +228,7 @@ function RegionMiniMap({ features, municipalitiesBySlug, macroName, highlightSlu
   );
 }
 
-function ChoroplethMap({ features, municipalitiesBySlug, year, metricKey, metricLabel, selectedSlug, onSelect, classBands }) {
+function ChoroplethMap({ features, municipalitiesBySlug, year, metricKey, metricLabel, selectedSlug, onSelect, classBands, onHoverSlugChange }) {
   const [hovered, setHovered] = useState(null);
   const [tooltip, setTooltip] = useState({ x: 0, y: 0 });
   const width = 980;
@@ -249,7 +249,6 @@ function ChoroplethMap({ features, municipalitiesBySlug, year, metricKey, metric
       project: createProjector(rows.map((item) => item.feature), width, height, 12),
     };
   }, [features, municipalitiesBySlug, year, metricKey]);
-  const active = hovered ?? enriched.rows.find((item) => item.slug === selectedSlug) ?? null;
   return (
     <div className="map-shell">
       <div className="map-frame">
@@ -265,9 +264,15 @@ function ChoroplethMap({ features, municipalitiesBySlug, year, metricKey, metric
                 stroke={isSelected || isHovered ? '#294d66' : '#ffffff'}
                 strokeWidth={isSelected || isHovered ? 1.8 : 0.85}
                 className={`map-path ${isHovered ? 'hovered' : ''}`}
-                onMouseEnter={(event) => { setHovered(item); setTooltip({ x: event.clientX, y: event.clientY }); }}
+                onMouseEnter={() => {
+                  setHovered(item);
+                  onHoverSlugChange?.(item.slug);
+                }}
                 onMouseMove={(event) => setTooltip({ x: event.clientX, y: event.clientY })}
-                onMouseLeave={() => setHovered(null)}
+                onMouseLeave={() => {
+                  setHovered(null);
+                  onHoverSlugChange?.(null);
+                }}
                 onClick={() => onSelect(item.slug)}
               />
             );
@@ -426,6 +431,7 @@ function App() {
   const [rightComparison, setRightComparison] = useState('petrolina');
   const [overviewTab, setOverviewTab] = useState('atlas');
   const [comparisonScope, setComparisonScope] = useState('__overview');
+  const [hoveredSlug, setHoveredSlug] = useState(null);
 
   useEffect(() => {
     const syncRoute = () => setRoute(getRouteFromHash());
@@ -461,6 +467,8 @@ function App() {
     return { average, top: yearlyRows[0] ?? null, classCounts: summaryForYear.classCounts, biggestClimb: deltas[0] ?? null };
   }, [selectedYear, metricKey, yearlyRows, model]);
   const topMunicipalities = yearlyRows.slice(0, 8).map((item) => item.municipality);
+  const activeHomeMunicipality = model.municipalitiesBySlug[hoveredSlug] ?? selectedMunicipality;
+  const activeHomeRank = yearlyRows.findIndex((item) => item.municipality.slug === activeHomeMunicipality.slug) + 1;
 
   function handleMetricChange(nextMetricKey) {
     startTransition(() => {
@@ -499,7 +507,29 @@ function App() {
         </div>
       </nav>
 
-      {route.page !== 'regioes' && !(route.page === 'overview' && overviewTab === 'comparacao') ? (
+      {route.page === 'overview' && overviewTab === 'atlas' ? (
+        <section className="panel control-bar map-info-bar">
+          <div className="map-info-item map-info-item-primary">
+            <span className="field-label">Municipio em destaque</span>
+            <strong className="map-info-name" title={activeHomeMunicipality.name}>{activeHomeMunicipality.name}</strong>
+          </div>
+          <div className="map-info-item">
+            <span className="field-label">{selectedMetric.label} {selectedYear}</span>
+            <strong>{formatDecimal(getMetricValue(activeHomeMunicipality, selectedYear, metricKey))}</strong>
+          </div>
+          <div className="map-info-item">
+            <span className="field-label">IDM {selectedYear}</span>
+            <strong>{formatDecimal(activeHomeMunicipality.idm?.[selectedYear])}</strong>
+          </div>
+          <div className="map-info-item">
+            <span className="field-label">Classificacao</span>
+            <strong title={`${valueClass(dataset.classBands, activeHomeMunicipality.idm?.[selectedYear])} · ${getRegionLabel(activeHomeMunicipality)}`}>
+              Rank #{activeHomeRank > 0 ? activeHomeRank : 'N/D'} · {valueClass(dataset.classBands, activeHomeMunicipality.idm?.[selectedYear])}
+            </strong>
+          </div>
+        </section>
+      ) : null}
+      {route.page !== 'regioes' && !(route.page === 'overview' && overviewTab === 'comparacao') && !(route.page === 'overview' && overviewTab === 'atlas') ? (
         <section className="panel control-bar">
           <label><span className="field-label">Ano</span><select value={selectedYear} onChange={(event) => setSelectedYear(event.target.value)}>{model.yearStrings.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
           <label><span className="field-label">Recorte</span><select value={metricKey} onChange={(event) => handleMetricChange(event.target.value)}><optgroup label="Sintese"><option value="idm">IDM-PE</option></optgroup><optgroup label="Dimensoes">{dataset.dimensions.map((dimension) => <option key={dimension.key} value={`dimension:${dimension.key}`}>{dimension.label}</option>)}</optgroup><optgroup label="Indicadores">{dataset.indicatorMetadata.map((indicator) => <option key={indicator.key} value={`indicator:${indicator.key}`}>{indicator.label}</option>)}</optgroup></select></label>
@@ -510,7 +540,7 @@ function App() {
         <section className="page-stack">
           <section className="dashboard-grid map-only-layout">
             <article className="panel map-page-panel">
-              <ChoroplethMap features={geojson.features} municipalitiesBySlug={model.municipalitiesBySlug} year={selectedYear} metricKey={metricKey} metricLabel={selectedMetric.label} selectedSlug={selectedMunicipality.slug} onSelect={setSelectedSlug} classBands={dataset.classBands} />
+              <ChoroplethMap features={geojson.features} municipalitiesBySlug={model.municipalitiesBySlug} year={selectedYear} metricKey={metricKey} metricLabel={selectedMetric.label} selectedSlug={selectedMunicipality.slug} onSelect={setSelectedSlug} classBands={dataset.classBands} onHoverSlugChange={setHoveredSlug} />
             </article>
           </section>
         </section>

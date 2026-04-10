@@ -161,18 +161,32 @@ input:focus, select:focus, button:focus-visible {
 .legend-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
 .legend-gradient { width: 120px; height: 10px; border-radius: 999px; background: linear-gradient(90deg, #d7dde3, #85b5cf, #2f6b8f); }
 .map-floating-tooltip {
-  position: fixed;
-  z-index: 10;
-  max-width: min(300px, calc(100vw - 24px));
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.96);
-  box-shadow: var(--shadow);
-  pointer-events: none;
-  transform: translate(-50%, calc(-100% - 34px));
+  display: none;
 }
 .map-hover-card { display: grid; gap: 6px; }
+.map-info-bar {
+  grid-template-columns: minmax(280px, 1.4fr) repeat(3, minmax(0, 1fr));
+  align-items: center;
+  min-height: 88px;
+}
+.map-info-item {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  align-content: center;
+}
+.map-info-item strong {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-info-item-primary {
+  padding-right: 10px;
+}
+.map-info-name {
+  font-size: 1.05rem;
+}
 
 .focus-stats-grid, .compare-sidebar-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .focus-panel, .sidebar-stack, .compare-stage, .compare-sidebar, .municipality-page, .region-page { min-height: 0; }
@@ -371,6 +385,7 @@ input:focus, select:focus, button:focus-visible {
 @media (max-width: 1199px) {
   .dashboard-grid, .comparison-layout, .municipality-detail-grid, .region-grid, .regional-ranking-grid, .compare-radar-grid, .dimension-card-grid { grid-template-columns: 1fr; height: auto; }
   .control-bar, .focus-stats-grid, .compare-sidebar-stats, .region-stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .map-info-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 132px; }
   .compare-metric-row { grid-template-columns: 1fr; }
   .compare-label { text-align: left; }
   .map-svg { min-height: 320px; }
@@ -380,6 +395,7 @@ input:focus, select:focus, button:focus-visible {
   .app-shell { width: min(100vw - 18px, 100%); }
   .topbar, .section-heading, .region-card-head, .radar-card-head, .map-footer, .municipality-heading, .compare-banner { flex-direction: column; }
   .control-bar, .focus-stats-grid, .compare-sidebar-stats, .region-stat-row { grid-template-columns: 1fr; }
+  .map-info-bar { grid-template-columns: 1fr; min-height: auto; }
   .headline-stat, .mini-stat, .hero-metric, .compare-sidebar, .compare-stage, .panel { padding: 18px; }
   h1 { max-width: none; }
 }
