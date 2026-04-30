@@ -16,3 +16,6 @@
 - O combobox de municipios passou a se comportar como select: abre a lista completa ao clique e filtra apenas na busca interna.
 - O card do mapa passou a exibir uma legenda discreta abaixo do mapa, com circulos coloridos para as quatro classes.
 - O bloco de classificacao da home ganhou tooltip breve explicando as faixas de cada classe.
+- O segundo indicador da barra da home passou a mostrar a variacao do IDM frente ao ano anterior, evitando duplicidade com o valor do recorte atual.
+- A variacao do IDM ganhou indicador visual: triangulo verde para alta e vermelho para queda.
+- A barra da home passou a exibir o ranking municipal da variacao anual do IDM.

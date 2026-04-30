@@ -387,7 +387,7 @@ input:focus, select:focus, button:focus-visible {
 .map-info-bar {
   position: relative;
   z-index: 20;
-  grid-template-columns: minmax(280px, 1.4fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(260px, 1.4fr) repeat(4, minmax(0, 1fr));
   align-items: center;
   min-height: 88px;
 }
@@ -403,6 +403,25 @@ input:focus, select:focus, button:focus-visible {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.delta-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.delta-value.positive { color: #26724a; }
+.delta-value.negative { color: #a9423b; }
+.delta-triangle {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+.delta-triangle.up {
+  border-bottom: 10px solid #2e8b57;
+}
+.delta-triangle.down {
+  border-top: 10px solid #b84d45;
 }
 .map-info-item-primary {
   padding-right: 10px;

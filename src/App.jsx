@@ -44,6 +44,11 @@ function formatPercentDelta(value) {
   return `${value >= 0 ? '+' : ''}${(value * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} p.p.`;
 }
 
+function formatIndexDelta(value) {
+  if (value == null) return 'Sem base';
+  return `${value >= 0 ? '+' : ''}${value.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`;
+}
+
 function slugify(value) {
   const base = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/['-]/g, ' ').replace(/\s+/g, ' ').trim();
   return MUNICIPALITY_ALIASES[base] ?? base;
@@ -631,6 +636,19 @@ function App() {
   const topMunicipalities = yearlyRows.slice(0, 8).map((item) => item.municipality);
   const activeHomeMunicipality = model.municipalitiesBySlug[hoveredSlug] ?? selectedMunicipality;
   const activeHomeRank = yearlyRows.findIndex((item) => item.municipality.slug === activeHomeMunicipality.slug) + 1;
+  const previousSelectedYear = String(Number(selectedYear) - 1);
+  const activeHomeIdmDelta = activeHomeMunicipality.idm?.[selectedYear] != null && activeHomeMunicipality.idm?.[previousSelectedYear] != null
+    ? activeHomeMunicipality.idm[selectedYear] - activeHomeMunicipality.idm[previousSelectedYear]
+    : null;
+  const deltaRankRows = useMemo(() => model.municipalities
+    .map((municipality) => {
+      const current = municipality.idm?.[selectedYear];
+      const previous = municipality.idm?.[previousSelectedYear];
+      return current == null || previous == null ? null : { municipality, value: current - previous };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.value - a.value), [model, selectedYear, previousSelectedYear]);
+  const activeHomeDeltaRank = deltaRankRows.findIndex((item) => item.municipality.slug === activeHomeMunicipality.slug) + 1;
 
   function handleMetricChange(nextMetricKey) {
     startTransition(() => {
@@ -691,8 +709,16 @@ function App() {
             <strong>{formatDecimal(getMetricValue(activeHomeMunicipality, selectedYear, metricKey))}</strong>
           </div>
           <div className="map-info-item">
-            <span className="field-label">IDM {selectedYear}</span>
-            <strong>{formatDecimal(activeHomeMunicipality.idm?.[selectedYear])}</strong>
+            <span className="field-label">Variacao IDM vs. {previousSelectedYear}</span>
+            <strong className={`delta-value ${activeHomeIdmDelta > 0 ? 'positive' : activeHomeIdmDelta < 0 ? 'negative' : 'neutral'}`}>
+              {activeHomeIdmDelta > 0 ? <i aria-hidden="true" className="delta-triangle up" /> : null}
+              {activeHomeIdmDelta < 0 ? <i aria-hidden="true" className="delta-triangle down" /> : null}
+              {formatIndexDelta(activeHomeIdmDelta)}
+            </strong>
+          </div>
+          <div className="map-info-item">
+            <span className="field-label">Ranking da variacao</span>
+            <strong>{activeHomeDeltaRank > 0 ? `Rank #${activeHomeDeltaRank}` : 'Sem base'}</strong>
           </div>
           <div className="map-info-item">
             <span className="field-label">Classificacao</span>
