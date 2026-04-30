@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useMemo, useState } from 'react';
+import React, { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 import dataset from './data/idmDataset.json';
 import geojson from './data/peMunicipios.json';
 
@@ -68,6 +68,14 @@ function valueClass(classBands, value) {
   if (value == null) return 'Sem classe';
   const band = classBands.find((item) => (item.min == null || value >= item.min) && (item.max == null || value < item.max));
   return band?.label ?? 'Sem classe';
+}
+
+function shortClassDescription(band) {
+  if (!band) return '';
+  if (band.min != null && band.max == null) return `>= ${formatDecimal(band.min)}`;
+  if (band.min != null && band.max != null) return `${formatDecimal(band.min)} a ${formatDecimal(band.max)}`;
+  if (band.min == null && band.max != null) return `< ${formatDecimal(band.max)}`;
+  return band.description ?? '';
 }
 
 function flattenGeometryCoordinates(geometry, target) {
@@ -279,6 +287,14 @@ function ChoroplethMap({ features, municipalitiesBySlug, year, metricKey, metric
           })}
         </svg>
       </div>
+      <div className="home-map-legend" aria-label="Legenda do mapa">
+        {classBands.map((band) => (
+          <span key={band.key}>
+            <i style={{ background: IDM_CLASS_COLORS[band.key] }} />
+            {band.label}
+          </span>
+        ))}
+      </div>
       {hovered ? (
         <div className="map-floating-tooltip" style={{ left: tooltip.x, top: tooltip.y }}>
           <div className="map-hover-card">
@@ -286,6 +302,143 @@ function ChoroplethMap({ features, municipalitiesBySlug, year, metricKey, metric
             <span>{metricLabel} {year}: {formatDecimal(hovered.value)}</span>
             <span>IDM {year}: {formatDecimal(hovered.municipality.idm?.[year])} · {valueClass(classBands, hovered.municipality.idm?.[year])}</span>
             <span>Rank #{enriched.rankBySlug[hovered.slug] ?? 'N/D'} · {getRegionLabel(hovered.municipality)}</span>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function HomeRankingPanel({ rows, selectedSlug, onSelect, year }) {
+  return (
+    <article className="panel home-ranking-panel">
+      <div className="home-ranking-head">
+        <div>
+          <span className="eyebrow">Ranking Geral</span>
+          <h3>Top 10 municipios</h3>
+        </div>
+      </div>
+      <div className="home-ranking-list">
+        {rows.slice(0, 10).map((item, index) => (
+          <button
+            key={item.municipality.slug}
+            type="button"
+            className={`home-ranking-row ${item.municipality.slug === selectedSlug ? 'active' : ''}`}
+            onClick={() => onSelect(item.municipality.slug)}
+          >
+            <span className="home-ranking-index">{index + 1}</span>
+            <strong>{item.municipality.name}</strong>
+            <b>{formatDecimal(item.value)}</b>
+          </button>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function HomeDimensionRankings({ dimensions, rankings, selectedSlug, onSelect }) {
+  return (
+    <article className="panel home-dimension-panel">
+      {dimensions.map((dimension) => (
+        <section key={dimension.key} className="dimension-ranking-card">
+          <span className="eyebrow">{dimension.key === 'governanca' ? 'Governanca' : dimension.label}</span>
+          <h3>Top 5</h3>
+          <div className="dimension-ranking-list">
+            {(rankings[dimension.key] ?? []).map((item, index) => (
+              <button
+                key={item.municipality.slug}
+                type="button"
+                className={`dimension-ranking-row ${item.municipality.slug === selectedSlug ? 'active' : ''}`}
+                onClick={() => onSelect(item.municipality.slug)}
+                title={`${item.municipality.name} - ${formatDecimal(item.value)}`}
+              >
+                <span>{index + 1}</span>
+                <strong>{item.municipality.name}</strong>
+                <b>{formatDecimal(item.value)}</b>
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </article>
+  );
+}
+
+function MunicipalityCombobox({ municipalities, selectedName, onSelect }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const rootRef = useRef(null);
+  const searchRef = useRef(null);
+  const normalizedValue = slugify(query);
+  const visibleMunicipalities = useMemo(() => {
+    if (!normalizedValue) return municipalities;
+    return municipalities.filter((municipality) => slugify(municipality.name).includes(normalizedValue));
+  }, [municipalities, normalizedValue]);
+
+  useEffect(() => {
+    function handlePointerDown(event) {
+      if (!rootRef.current?.contains(event.target)) setIsOpen(false);
+    }
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) searchRef.current?.focus();
+  }, [isOpen]);
+
+  function openList() {
+    setQuery('');
+    setIsOpen(true);
+  }
+
+  function handleSelect(municipality) {
+    onSelect(municipality.slug);
+    setQuery('');
+    setIsOpen(false);
+  }
+
+  return (
+    <div className="municipality-combobox" ref={rootRef}>
+      <span className="field-label">Municipio em destaque</span>
+      <button
+        type="button"
+        className="municipality-select-button"
+        onClick={() => (isOpen ? setIsOpen(false) : openList())}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
+        <span>{selectedName}</span>
+        <b>⌄</b>
+      </button>
+      {isOpen ? (
+        <div className="municipality-options">
+          <input
+            ref={searchRef}
+            className="municipality-option-search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') setIsOpen(false);
+              if (event.key === 'Enter' && visibleMunicipalities[0]) handleSelect(visibleMunicipalities[0]);
+            }}
+            placeholder="Buscar municipio"
+            aria-label="Buscar municipio"
+          />
+          <div className="municipality-option-list" role="listbox">
+          {visibleMunicipalities.map((municipality) => (
+            <button
+              key={municipality.slug}
+              type="button"
+              className={`municipality-option ${municipality.name === selectedName ? 'active' : ''}`}
+              onClick={() => handleSelect(municipality)}
+              role="option"
+              aria-selected={municipality.name === selectedName}
+            >
+              {municipality.name}
+            </button>
+          ))}
+          {!visibleMunicipalities.length ? <div className="municipality-empty">Nenhum municipio encontrado</div> : null}
           </div>
         </div>
       ) : null}
@@ -466,6 +619,15 @@ function App() {
     }).filter(Boolean).sort((a, b) => b.delta - a.delta);
     return { average, top: yearlyRows[0] ?? null, classCounts: summaryForYear.classCounts, biggestClimb: deltas[0] ?? null };
   }, [selectedYear, metricKey, yearlyRows, model]);
+  const idmRows = useMemo(() => model.municipalities.map((municipality) => ({ municipality, value: municipality.idm?.[selectedYear] ?? null })).filter((item) => item.value != null).sort((a, b) => b.value - a.value), [model, selectedYear]);
+  const dimensionRankings = useMemo(() => Object.fromEntries(dataset.dimensions.map((dimension) => [
+    dimension.key,
+    model.municipalities
+      .map((municipality) => ({ municipality, value: municipality.dimensions?.[dimension.key]?.[selectedYear] ?? null }))
+      .filter((item) => item.value != null)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5),
+  ])), [model, selectedYear]);
   const topMunicipalities = yearlyRows.slice(0, 8).map((item) => item.municipality);
   const activeHomeMunicipality = model.municipalitiesBySlug[hoveredSlug] ?? selectedMunicipality;
   const activeHomeRank = yearlyRows.findIndex((item) => item.municipality.slug === activeHomeMunicipality.slug) + 1;
@@ -492,13 +654,21 @@ function App() {
 
   const activeNav = route.page === 'regioes' ? 'regioes' : route.page === 'municipio' ? 'municipio' : overviewTab === 'comparacao' ? 'comparacao' : 'overview';
 
+  const isAtlasHome = route.page === 'overview' && overviewTab === 'atlas';
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isAtlasHome ? 'home-atlas-shell' : ''}`}>
       <nav className="topbar panel">
         <button type="button" className="brand-lockup" onClick={() => handleOverviewRoute('atlas')}>
           <span className="brand-mark">IDM</span>
           <span className="brand-copy"><strong>IDM-PE</strong><small>painel territorial</small></span>
         </button>
+        {isAtlasHome ? (
+          <div className="latest-index-badge">
+            <span>Últimos índices calculados</span>
+            <strong>{latestYear}</strong>
+          </div>
+        ) : <div className="topbar-spacer" aria-hidden="true" />}
         <div className="topbar-links">
           <button type="button" className={`nav-link ${activeNav === 'overview' ? 'active' : ''}`} onClick={() => handleNav('overview')}>Home</button>
           <button type="button" className={`nav-link ${activeNav === 'regioes' ? 'active' : ''}`} onClick={() => handleNav('regioes')}>Regioes</button>
@@ -510,8 +680,11 @@ function App() {
       {route.page === 'overview' && overviewTab === 'atlas' ? (
         <section className="panel control-bar map-info-bar">
           <div className="map-info-item map-info-item-primary">
-            <span className="field-label">Municipio em destaque</span>
-            <strong className="map-info-name" title={activeHomeMunicipality.name}>{activeHomeMunicipality.name}</strong>
+            <MunicipalityCombobox
+              municipalities={model.municipalities}
+              selectedName={selectedMunicipality.name}
+              onSelect={setSelectedSlug}
+            />
           </div>
           <div className="map-info-item">
             <span className="field-label">{selectedMetric.label} {selectedYear}</span>
@@ -523,9 +696,14 @@ function App() {
           </div>
           <div className="map-info-item">
             <span className="field-label">Classificacao</span>
-            <strong title={`${valueClass(dataset.classBands, activeHomeMunicipality.idm?.[selectedYear])} · ${getRegionLabel(activeHomeMunicipality)}`}>
+            <strong>
               Rank #{activeHomeRank > 0 ? activeHomeRank : 'N/D'} · {valueClass(dataset.classBands, activeHomeMunicipality.idm?.[selectedYear])}
             </strong>
+            <div className="classification-tooltip" role="tooltip">
+              {dataset.classBands.map((band) => (
+                <span key={band.key}><b>{band.label}</b> {shortClassDescription(band)}</span>
+              ))}
+            </div>
           </div>
         </section>
       ) : null}
@@ -538,10 +716,12 @@ function App() {
       ) : null}
       {route.page === 'overview' && overviewTab === 'atlas' ? (
         <section className="page-stack">
-          <section className="dashboard-grid map-only-layout">
+          <section className="dashboard-grid home-map-layout">
+            <HomeRankingPanel rows={idmRows} selectedSlug={selectedMunicipality.slug} onSelect={setSelectedSlug} year={selectedYear} />
             <article className="panel map-page-panel">
               <ChoroplethMap features={geojson.features} municipalitiesBySlug={model.municipalitiesBySlug} year={selectedYear} metricKey={metricKey} metricLabel={selectedMetric.label} selectedSlug={selectedMunicipality.slug} onSelect={setSelectedSlug} classBands={dataset.classBands} onHoverSlugChange={setHoveredSlug} />
             </article>
+            <HomeDimensionRankings dimensions={dataset.dimensions} rankings={dimensionRankings} selectedSlug={selectedMunicipality.slug} onSelect={setSelectedSlug} />
           </section>
         </section>
       ) : null}
